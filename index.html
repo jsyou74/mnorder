@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>제품 주문 시스템</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, 'Noto Sans KR', sans-serif;
+      background: #f3f6fc;
+      color: #0f172a;
+    }
+    header {
+      background: #2d55a3;
+      color: white;
+      text-align: center;
+      padding: 22px 12px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+    .wrap {
+      max-width: 1180px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    h1 {
+      margin: 0 0 24px;
+      font-size: 28px;
+    }
+    .company-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    input {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 13px 14px;
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #2d55a3;
+      box-shadow: 0 0 0 3px rgba(45, 85, 163, 0.12);
+    }
+    #companyName { flex: 1; }
+    button {
+      border: none;
+      border-radius: 8px;
+      background: #2d55a3;
+      color: white;
+      padding: 13px 22px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { background: #214783; }
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+    thead th {
+      background: #243f8f;
+      color: white;
+      padding: 14px 10px;
+      font-size: 17px;
+    }
+    tbody td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 10px;
+      font-size: 16px;
+      text-align: center;
+    }
+    tbody td:nth-child(2) { text-align: left; }
+    .qty {
+      width: 120px;
+      text-align: center;
+    }
+    .notice {
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      text-align: center;
+      font-weight: 600;
+    }
+    .submit-area {
+      text-align: center;
+      margin-top: 24px;
+    }
+    .submit-area button {
+      min-width: 220px;
+      font-size: 18px;
+    }
+    #status {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .success { color: #15803d; }
+    .error { color: #b91c1c; }
+    footer {
+      text-align: center;
+      color: #64748b;
+      padding: 24px;
+      font-size: 14px;
+    }
+    @media (max-width: 720px) {
+      header { font-size: 22px; }
+      .card { padding: 18px; }
+      h1 { font-size: 22px; }
+      .company-row { flex-direction: column; }
+      table { font-size: 14px; }
+      thead th, tbody td { padding: 10px 6px; }
+      .qty { width: 78px; }
+      tbody td:nth-child(2) { min-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <header>제품 주문 시스템</header>
+
+  <main class="wrap">
+    <section class="card">
+      <h1>주문할 제품의 수량을 입력해 주세요.</h1>
+
+      <div class="company-row">
+        <input id="companyName" type="text" placeholder="업체명을 입력하세요" />
+        <button type="button" onclick="saveCompanyName()">업체명 저장</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>번호</th>
+            <th>제품명</th>
+            <th>유통기한</th>
+            <th>주문수량</th>
+          </tr>
+        </thead>
+        <tbody id="productTable">
+          <tr><td colspan="4">제품 목록을 불러오는 중입니다...</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notice">수량을 입력한 제품만 주문됩니다.</div>
+
+      <div class="submit-area">
+        <button id="submitButton" type="button" onclick="submitOrder()">제출하기</button>
+      </div>
+
+      <div id="status"></div>
+    </section>
+  </main>
+
+  <footer>© 2025 제품 주문 시스템</footer>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzYlj9Nl82G-m0G1uSaudbx1vg5tYWn8cqvm07QG10dRgJ6phstYLIdzZX6PQZrcGzxxQ/exec';
+    let products = [];
+
+    window.onload = function () {
+      const savedCompany = localStorage.getItem('companyName');
+      if (savedCompany) {
+        document.getElementById('companyName').value = savedCompany;
+      }
+      loadProducts();
+    };
+
+    function setStatus(message, type) {
+      const status = document.getElementById('status');
+      status.textContent = message || '';
+      status.className = type || '';
+    }
+
+    function saveCompanyName() {
+      const companyName = document.getElementById('companyName').value.trim();
+      if (!companyName) {
+        alert('업체명을 입력해 주세요.');
+        return;
+      }
+      localStorage.setItem('companyName', companyName);
+      alert('업체명이 저장되었습니다.');
+    }
+
+    function loadProducts() {
+      const callbackName = 'receiveProducts_' + Date.now();
+      const script = document.createElement('script');
+
+      window[callbackName] = function (data) {
+        try {
+          if (!data || !data.success) {
+            throw new Error(data && data.message ? data.message : '제품 목록을 불러오지 못했습니다.');
+          }
+          products = data.products || [];
+          renderProducts();
+        } catch (error) {
+          renderError(error.message);
+        } finally {
+          delete window[callbackName];
+          script.remove();
+        }
+      };
+
+      script.onerror = function () {
+        renderError('제품 목록을 불러오지 못했습니다.');
+        delete window[callbackName];
+        script.remove();
+      };
+
+      script.src = API_URL + '?action=getProducts&callback=' + callbackName;
+      document.body.appendChild(script);
+    }
+
+    function renderProducts() {
+      const tbody = document.getElementById('productTable');
+      tbody.innerHTML = '';
+
+      if (products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">등록된 제품이 없습니다.</td></tr>';
+        return;
+      }
+
+      products.forEach(function (product, index) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.expiry)}</td>
+          <td><input class="qty" type="number" min="0" step="1" placeholder="수량" data-index="${index}" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderError(message) {
+      document.getElementById('productTable').innerHTML =
+        `<tr><td colspan="4">${escapeHtml(message)}</td></tr>`;
+    }
+
+    function submitOrder() {
+      const companyName = document.getElementById('companyName').value.trim();
+      if (!companyName) {
+        alert('업체명을 입력해 주세요.');
+        return;
+      }
+      localStorage.setItem('companyName', companyName);
+
+      const items = [];
+      document.querySelectorAll('.qty').forEach(function (input) {
+        const quantity = input.value.trim();
+        const index = Number(input.dataset.index);
+        if (quantity && Number(quantity) > 0) {
+          items.push({
+            name: products[index].name,
+            expiry: products[index].expiry,
+            quantity: quantity
+          });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('주문 수량을 하나 이상 입력해 주세요.');
+        return;
+      }
+
+      const submitButton = document.getElementById('submitButton');
+      submitButton.disabled = true;
+      setStatus('주문을 제출하는 중입니다...', '');
+
+      const order = { companyName: companyName, items: items };
+
+      fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(order)
+      }).then(function () {
+        setStatus('주문이 제출되었습니다. 이메일과 주문 기록을 확인해 주세요.', 'success');
+        document.querySelectorAll('.qty').forEach(input => input.value = '');
+      }).catch(function () {
+        setStatus('주문 제출 중 오류가 발생했습니다.', 'error');
+      }).finally(function () {
+        submitButton.disabled = false;
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+</body>
+</html>
