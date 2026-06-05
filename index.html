@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GGH 제품 주문 시스템</title>
+  <title>GGH Order System</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -135,35 +135,35 @@
   </style>
 </head>
 <body>
-  <header>GGH 제품 주문 시스템</header>
+  <header>GGH Order System 제품 주문 시스템</header>
 
   <main class="wrap">
     <section class="card">
-      <h1>주문할 제품의 수량을 입력해 주세요.</h1>
+      <h1>Please enter the quantity of the product you wish to order. 주문할 제품의 수량을 입력해 주세요.</h1>
 
       <div class="company-row">
-        <input id="companyName" type="text" placeholder="업체명을 입력하세요" />
-        <button type="button" onclick="saveCompanyName()">업체명 저장</button>
+        <input id="companyName" type="text" placeholder="Enter the vendor name 업체명을 입력하세요" />
+        <button type="button" onclick="saveCompanyName()">Save 업체명 저장</button>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>번호</th>
-            <th>제품명</th>
-            <th>유통기한</th>
-            <th>주문수량</th>
+            <th>No</th>
+            <th>Product</th>
+            <th>Expiry Date</th>
+            <th>Order Qty</th>
           </tr>
         </thead>
         <tbody id="productTable">
-          <tr><td colspan="4">제품 목록을 불러오는 중입니다...</td></tr>
+          <tr><td colspan="4">Loading product list 제품 목록을 불러오는 중입니다...</td></tr>
         </tbody>
       </table>
 
-      <div class="notice">수량을 입력한 제품만 주문됩니다.</div>
+      <div class="notice">"Only products with an entered quantity will be ordered. 수량을 입력한 제품만 주문됩니다.</div>
 
       <div class="submit-area">
-        <button id="submitButton" type="button" onclick="submitOrder()">제출하기</button>
+        <button id="submitButton" type="button" onclick="submitOrder()">Submit 제출하기</button>
       </div>
 
       <div id="status"></div>
