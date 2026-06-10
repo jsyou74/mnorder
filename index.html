@@ -296,7 +296,7 @@
         setStatus('Your order has been submitted.', 'success');
         document.querySelectorAll('.qty').forEach(input => input.value = '');
       }).catch(function () {
-        setStatus('주문 제출 중 오류가 발생했습니다.', 'error');
+        setStatus('An error occurred while submitting your order.', 'error');
       }).finally(function () {
         submitButton.disabled = false;
       });
