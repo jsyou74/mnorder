@@ -283,7 +283,7 @@
 
       const submitButton = document.getElementById('submitButton');
       submitButton.disabled = true;
-      setStatus('주문을 제출하는 중입니다...', '');
+      setStatus('Processing ...', '');
 
       const order = { companyName: companyName, items: items };
 
@@ -293,7 +293,7 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(order)
       }).then(function () {
-        setStatus('주문이 제출되었습니다. 이메일과 주문 기록을 확인해 주세요.', 'success');
+        setStatus('Your order has been submitted.', 'success');
         document.querySelectorAll('.qty').forEach(input => input.value = '');
       }).catch(function () {
         setStatus('주문 제출 중 오류가 발생했습니다.', 'error');
